@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project default="p2build" name="p2Build" basedir="../net.certiv.dsl.ui.feature">
+
+	<!-- Preliminaries -->
+	<property file="D:/DevFiles/Java/WorkSpaces/Main/net.certiv.certivtools.build/Action.properties" />
+	<include file="D:/DevFiles/Java/WorkSpaces/Main/net.certiv.certivtools.build/ActionLib.xml" />
+
+	<!-- Custom values -->
+	<property name="ui" value="net.certiv.dsl.ui" />
+	<property name="core" value="net.certiv.dsl.core" />
+	<property name="antlr" value="net.certiv.dsl.antlr" />
+
+	<property name="plugins" value="${ui}, ${core}, ${antlr}" />
+	<property name="features" value="${ui}.feature, ${core}.feature, ${antlr}.feature" />
+	<property name="srcRepo" value="D:/DevFiles/Java/WorkSpaces/Main/SourceSite" />
+	<property name="dstRepo" value="D:/DevFiles/Java/WorkSpaces/Main/OutputSite" />
+
+	<target name="p2build">
+
+		<!-- Set up the build directory -->
+		<cleanBuildDir />
+
+		<!-- Prep the build directory  -->
+		<preBuild features="${features}" plugins="${plugins}" />
+
+		<!-- Run the PDE build for feature(s)  -->
+		<build features="${features}" />
+
+		<generate repo="${srcRepo}" />
+		<categorize repo="${srcRepo}" />
+		<refresh wsDir="${srcRepo}" />
+
+		<!-- Promote the build jars to the OutputSite -->
+		<publish feature="${ui}.feature" />
+		<publish feature="${core}.feature" />
+		<publish feature="${antlr}.feature" />
+
+		<generate repo="${dstRepo}" />
+		<categorize repo="${dstRepo}" />
+		<refresh wsDir="${dstRepo}" />
+
+	</target>
+</project>

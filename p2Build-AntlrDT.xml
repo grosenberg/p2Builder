@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project default="p2build" name="p2Build" basedir="../net.certiv.antlrdt4.feature">
+
+	<!-- Preliminaries -->
+	<property file="D:/DevFiles/Java/WorkSpaces/Main/net.certiv.certivtools.build/Action.properties" />
+	<include file="D:/DevFiles/Java/WorkSpaces/Main/net.certiv.certivtools.build/ActionLib.xml" />
+
+	<!-- Custom values -->
+	<property name="base" value="net.certiv.antlrdt4" />
+
+	<property name="plugins" value="${base}.ui, ${base}.core, ${base}.st.ui, ${base}.st.core" />
+	<property name="feature" value="${base}.feature" />
+	<property name="srcRepo" value="D:/DevFiles/Java/WorkSpaces/Main/SourceSite" />
+	<property name="dstRepo" value="D:/DevFiles/Java/WorkSpaces/Main/OutputSite" />
+
+	<target name="p2build">
+
+		<!-- Set up the build directory -->
+		<cleanBuildDir />
+
+		<!-- Prep the build directory  -->
+		<preBuild features="${feature}" plugins="${plugins}" />
+
+		<!-- Run the PDE build for feature(s)  -->
+		<build features="${feature}" />
+
+		<generate repo="${srcRepo}" />
+		<categorize repo="${srcRepo}" />
+		<refresh wsDir="${srcRepo}" />
+
+		<!-- Promote the build jars to the OutputSite -->
+		<publish feature="${feature}" />
+		<generate repo="${dstRepo}" />
+		<categorize repo="${dstRepo}" />
+		<refresh wsDir="${dstRepo}" />
+
+	</target>
+</project>

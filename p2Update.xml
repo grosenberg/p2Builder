@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project default="p2Update" name="p2Update" basedir="../net.certiv.certivtools.feature">
+
+	<!-- Preliminaries -->
+	<property file="D:/DevFiles/Java/WorkSpaces/Main/net.certiv.certivtools.build/Action.properties" />
+	<include file="D:/DevFiles/Java/WorkSpaces/Main/net.certiv.certivtools.build/ActionLib.xml" />
+
+	<!-- Custom values -->
+	<property name="srcRepo" value="D:/DevFiles/Java/WorkSpaces/Main/SourceSite" />
+	<property name="dstRepo" value="D:/DevFiles/Java/WorkSpaces/Main/OutputSite" />
+
+	<target name="p2Update">
+		<refresh wsDir="${dstRepo}" />
+		<update repo="${dstRepo}" />
+		<refresh wsDir="${dstRepo}" />
+	</target>
+</project>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project default="p2build" name="p2Build" basedir="../net.certiv.extdiff.feature">
+
+	<!-- Preliminaries -->
+	<property file="D:/DevFiles/Java/WorkSpaces/Main/net.certiv.certivtools.build/Action.properties" />
+	<include file="D:/DevFiles/Java/WorkSpaces/Main/net.certiv.certivtools.build/ActionLib.xml" />
+
+	<!-- Custom values -->
+	<property name="plugin" value="net.certiv.extdiff" />
+	<property name="srcRepo" value="D:/DevFiles/Java/WorkSpaces/Main/SourceSite" />
+	<property name="dstRepo" value="D:/DevFiles/Java/WorkSpaces/Main/OutputSite" />
+
+
+	<target name="p2build">
+
+		<!-- Set up the build directory -->
+		<cleanBuildDir />
+
+		<!-- Prep the build directory -->
+		<preBuild features="${plugin}.feature" plugins="${plugin}" />
+
+		<!-- Run the PDE build for feature(s) -->
+		<build features="${plugin}.feature" />
+		<generate repo="${srcRepo}" />
+		<categorize repo="${srcRepo}" />
+		<refresh wsDir="${srcRepo}" />
+
+		<!-- Promote the build jars to the OutputSite -->
+		<publish feature="${plugin}.feature" />
+		<generate repo="${dstRepo}" />
+		<categorize repo="${dstRepo}" />
+		<refresh wsDir="${dstRepo}" />
+
+	</target>
+</project>

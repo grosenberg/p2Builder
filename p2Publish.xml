@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project default="p2publish" name="p2publish" basedir="../net.certiv.certivtools.feature">
+
+	<!-- Preliminaries -->
+	<property file="D:/DevFiles/Java/WorkSpaces/Main/net.certiv.certivtools.build/Action.properties" />
+	<include file="D:/DevFiles/Java/WorkSpaces/Main/net.certiv.certivtools.build/ActionLib.xml" />
+
+	<!-- Custom values -->
+	<property name="dstRepo" value="${def.dstRepo}" />
+	<property name="pubRepo" value="${def.pubRepo}" />
+
+	<target name="p2publish">
+		<sequential>
+
+			<!-- Prepare a backup of the public update site -->
+			<echo>Creating archive copy in "${pubRepo}"</echo>
+			<mkdir dir="${pubRepo}/archive" />
+			<tstamp>
+				<format property="repoTime" pattern="yyyyMMddhhmm" />
+			</tstamp>
+			<zip destfile="${pubRepo}/archive/p2Certiv_${repoTime}.zip" basedir="${pubRepo}" excludes="archive/**" />
+
+			<!-- Publish jars to the public update site -->
+			<echo>Publishing everything from "${dstRepo}" to "${pubRepo}"</echo>
+			<publishAll srcRepo="${dstRepo}" dstRepo="${pubRepo}" />
+
+			<!-- Proof the public update site just to be safe -->
+			<generate repo="${pubRepo}" />
+			<categorize repo="${pubRepo}" />
+
+			<echo>Publication complete.</echo>
+		</sequential>
+	</target>
+
+</project>

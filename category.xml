@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/net.certiv.bent.core.win32.feature_0.4.1.qualifier.jar" id="net.certiv.bent.core.win32.feature" version="0.4.1.qualifier" os="win32" ws="win32" arch="x86,x86_64">
+      <category name="net.certiv"/>
+   </feature>
+   <feature url="features/net.certiv.bent.ui.win32.feature_0.4.1.qualifier.jar" id="net.certiv.bent.ui.win32.feature" version="0.4.1.qualifier" os="win32" ws="win32" arch="x86_64">
+      <category name="net.certiv"/>
+   </feature>
+   <feature url="features/net.certiv.bent.ui.win32.x86.feature_0.4.1.qualifier.jar" id="net.certiv.bent.ui.win32.x86.feature" version="0.4.1.qualifier" os="win32" ws="win32" arch="x86">
+      <category name="net.certiv"/>
+   </feature>
+   <feature url="features/net.certiv.codechase.feature_0.9.0.qualifier.jar" id="net.certiv.codechase.feature" version="0.9.0.qualifier">
+      <category name="net.certiv"/>
+   </feature>
+   <feature url="features/net.certiv.ntail.feature_1.4.0.qualifier.jar" id="net.certiv.ntail.feature" version="1.4.0.qualifier">
+      <category name="net.certiv"/>
+   </feature>
+   <feature url="features/net.certiv.dsl.dev.feature_0.5.2.qualifier.jar" id="net.certiv.dsl.dev.feature" version="0.5.2.qualifier">
+      <category name="net.certiv"/>
+   </feature>
+   <feature url="features/net.certiv.dsl.dev.tool.feature_0.5.2.qualifier.jar" id="net.certiv.dsl.dev.tool.feature" version="0.5.2.qualifier">
+      <category name="net.certiv"/>
+   </feature>
+   <feature url="features/net.certiv.callgraph.feature_0.9.4.qualifier.jar" id="net.certiv.callgraph.feature" version="0.9.4.qualifier">
+      <category name="net.certiv"/>
+   </feature>
+   <feature url="features/net.certiv.certivtools.feature_1.0.6.qualifier.jar" id="net.certiv.certivtools.feature" version="1.0.6.qualifier">
+      <category name="net.certiv"/>
+   </feature>
+   <feature url="features/net.certiv.proguarddt.feature_0.9.0.qualifier.jar" id="net.certiv.proguarddt.feature" version="0.9.0.qualifier">
+      <category name="net.certiv"/>
+   </feature>
+   <feature url="features/net.certiv.jdoceditor.feature_3.4.0.qualifier.jar" id="net.certiv.jdoceditor.feature" version="3.4.0.qualifier">
+      <category name="net.certiv"/>
+   </feature>
+   <feature url="features/net.certiv.dsl.feature_0.5.5.qualifier.jar" id="net.certiv.dsl.feature" version="0.5.5.qualifier">
+      <category name="net.certiv"/>
+   </feature>
+   <feature url="features/net.certiv.antlrdt4.feature_4.2.0.qualifier.jar" id="net.certiv.antlrdt4.feature" version="4.2.0.qualifier">
+      <category name="net.certiv"/>
+   </feature>
+   <feature url="features/net.certiv.extdiff.feature_0.1.0.qualifier.jar" id="net.certiv.extdiff.feature" version="0.1.0.qualifier">
+      <category name="net.certiv"/>
+   </feature>
+   <category-def name="net.certiv" label="Certiv Tools"/>
+</site>

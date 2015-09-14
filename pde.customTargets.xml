@@ -1,0 +1,3 @@
+<project name="customTargets.template" default="noDefault">
+	<import file="C:\DevBin\Eclipse45_64\eclipse\plugins\org.eclipse.pde.build_3.9.100.v20150521-1524\templates\headless-build/customTargets.xml" />
+</project>

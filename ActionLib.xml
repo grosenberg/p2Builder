@@ -1,0 +1,472 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- ############################################################################### -->
+<!-- # Copyright (c) 2011-2015 Gerald Rosenberg -->
+<!-- # All rights reserved. This program and the accompanying materials -->
+<!-- # are made available under the terms of the Eclipse Public License v1.0 -->
+<!-- # which accompanies this distribution, and is available at -->
+<!-- # http://www.eclipse.org/legal/epl-v10.html -->
+<!-- # -->
+<!-- # Contributors: -->
+<!-- #     Gerald Rosenberg - initial API and implementation -->
+<!-- ############################################################################### -->
+
+<project name="ActionLib">
+
+	<taskdef resource="${ct.ant.contrib.antlib}" classpath="${ct.ant.contrib.jar}" />
+
+	<!-- ================================================================== -->
+	<!-- Export a feature and related plugins to a repository (UI based)	-->
+	<!-- (uses: repo, feature) 												-->
+	<!-- ================================================================== -->
+	<macrodef name="export">
+		<attribute name="repo" />
+		<attribute name="feature" />
+
+		<sequential>
+			<echo>Exporting "@{feature}" to "@{repo}"</echo>
+			<pde.exportFeatures features="@{feature}"
+			                    destination="@{repo}"
+			                    exportSource="false"
+			                    exportType="directory"
+			                    allowBinaryCycles="true"
+			                    useJARFormat="true" />
+		</sequential>
+	</macrodef>
+
+
+	<!-- ================================================================== -->
+	<!-- Preps the build directory for building a feature					-->
+	<!-- (uses: features, plugins, build.dir)								-->
+	<!-- ================================================================== -->
+	<macrodef name="preBuild">
+		<attribute name="features" />
+		<attribute name="plugins" />
+		<attribute name="build.dir" default="${def.workspace}/build" />
+
+		<sequential>
+			<tstamp>
+				<format property="qualifier" pattern="yyyyMMddHHmm" />
+			</tstamp>
+
+			<for list="@{features}" param="feature" trim="true">
+				<sequential>
+					<copy todir="@{build.dir}/features/@{feature}">
+						<fileset dir="${def.workspace}/@{feature}">
+							<exclude name="**/attic/**" />
+							<exclude name="**/build/**" />
+							<exclude name="**/*.log" />
+							<exclude name="**/*.zip" />
+						</fileset>
+					</copy>
+
+					<replaceregexp flags="g">
+						<regexp pattern="\.qualifier" />
+						<substitution expression=".${qualifier}" />
+						<fileset dir="@{build.dir}/features/@{feature}" includes="feature.xml" />
+					</replaceregexp>
+				</sequential>
+			</for>
+
+			<for list="@{plugins}" param="plugin" trim="true">
+				<sequential>
+					<copy todir="@{build.dir}/plugins/@{plugin}">
+						<fileset dir="${def.workspace}/@{plugin}">
+							<exclude name="**/attic/**" />
+							<exclude name="**/bin/**" />
+							<exclude name="**/*.pro" />
+							<exclude name="**/*.zip" />
+						</fileset>
+					</copy>
+
+					<replaceregexp flags="g">
+						<regexp pattern="\.qualifier" />
+						<substitution expression=".${qualifier}" />
+						<fileset dir="@{build.dir}/plugins/@{plugin}" includes="plugin.xml **/MANIFEST.MF" />
+					</replaceregexp>
+				</sequential>
+			</for>
+
+			<!-- Copy the generic/modified build.properties & custom targets files to the build directory -->
+			<copy tofile="@{build.dir}/build.properties" file="${ct.build.properties}" />
+			<!-- <copy tofile="@{build.dir}/customTargets.xml" file="${ct.customTargets}" /> -->
+
+		</sequential>
+	</macrodef>
+
+
+	<!-- ================================================================== -->
+	<!-- Builds features and plugins; outputs to a p2 repository			-->
+	<!-- (uses: features, build.dir, repo)	(optional: configs)				-->
+	<!-- ================================================================== -->
+	<macrodef name="build">
+		<attribute name="features" />
+		<attribute name="build.dir" default="${def.workspace}/build" />
+		<attribute name="repo" default="${def.srcRepo}" />
+		<attribute name="b.arch" default="${basearch}" />
+		<attribute name="configs" default="*,*,*" />
+		<attribute name="e.home" default="${ct.eclipse.home}" />
+		<attribute name="j.home" default="${ct.java.home}" />
+		<attribute name="sep" default="${path.separator}" />
+
+		<sequential>
+
+			<for list="@{features}" param="feature" trim="true">
+				<sequential>
+					<echo>Building "@{feature}" to "@{repo}"</echo>
+					<echo>Using    "@{e.home}" </echo>
+					<echo>         "@{j.home}" </echo>
+
+					<java jar="@{e.home}/plugins/${ct.eclipse.launcher}"
+					      jvm="@{j.home}/bin/java"
+					      fork="true"
+					      failonerror="true">
+
+						<arg value="-application" />
+						<arg value="org.eclipse.ant.core.antRunner" />
+
+						<arg value="-buildfile" />
+						<arg value="@{e.home}/plugins/${ct.builder}/scripts/build.xml" />
+
+						<arg value="-DbaseLocation=@{e.home}" />
+						<arg value="-Dbasearch=@{b.arch}" />
+
+						<arg value="-DpluginPath=@{builder.dir}/plugins@{sep}@{e.home}/plugins@{sep}${ct.deltapack.home}/plugins" />
+
+						<arg value="-DbuildDirectory=@{build.dir}" />
+						<arg value="-Dconfigs=@{configs}" />
+						<arg value="-Dbuilder=@{build.dir}" />
+						<arg value="-DbuildTempFolder=@{build.dir}/tmp" />
+
+						<arg value="-DtopLevelElementType=feature" />
+						<arg value="-DtopLevelElementId=@{feature}" />
+
+						<arg value="-Dp2.gathering=true" />
+						<arg value="-Dp2.category.definition=file:${def.category}" />
+						<arg value="-Dp2.build.repo=file:@{repo}" />
+					</java>
+				</sequential>
+			</for>
+
+		</sequential>
+	</macrodef>
+
+	<!-- ================================================================== -->
+	<!-- Copy and convert 64 bit java project source to 32 bit				-->
+	<!-- (uses: dir64, dir32)												-->
+	<!-- ================================================================== -->
+	<macrodef name="gen32bitProject">
+		<attribute name="dir32" />
+		<attribute name="dir64" />
+
+		<sequential>
+			<delete includeemptydirs="true">
+				<fileset dir="@{dir32}/src" includes="**/*" />
+			</delete>
+			<copy todir="@{dir32}/src">
+				<fileset dir="@{dir64}/src" />
+			</copy>
+
+			<echo>Converting java files to 32 bit in @{dir32}/src </echo>
+			<replaceregexp flags="g">
+				<regexp pattern="long\s?/\*\s?int\s?\*/" />
+				<substitution expression="int/* long */" />
+				<fileset dir="@{dir32}/src" includes="**/*.java" />
+			</replaceregexp>
+			<replaceregexp flags="g">
+				<regexp pattern="long\[(.*?)\]\s?/\*\s?int\[.*?\]\s?\*/" />
+				<substitution expression="int[\1]/* long[\1] */" />
+				<fileset dir="@{dir32}/src" includes="**/*.java" />
+			</replaceregexp>
+		</sequential>
+	</macrodef>
+
+	<!-- ================================================================== -->
+	<!-- Preps a build directory for building a feature						-->
+	<!-- (uses: features, plugins, build.dir)								-->
+	<!-- ================================================================== -->
+	<macrodef name="cleanBuildDir">
+		<attribute name="build.dir" default="${def.workspace}/build" />
+
+		<sequential>
+			<delete dir="@{build.dir}" quiet="true" />
+
+			<mkdir dir="@{build.dir}/features" />
+			<mkdir dir="@{build.dir}/plugins" />
+			<mkdir dir="@{build.dir}/tmp" />
+		</sequential>
+	</macrodef>
+
+
+	<!-- ================================================================== -->
+	<!-- Generates the build.xml for a given feature 						-->
+	<!-- (uses: repo, feature) 												-->
+	<!-- ================================================================== -->
+	<macrodef name="genBuildScript">
+		<attribute name="feature" />
+		<attribute name="configInfo" />
+
+		<sequential>
+			<eclipse.buildScript elements="feature@@@{feature}"
+			                     buildDirectory="${def.workspace}"
+			                     baseLocation="${ct.eclipse.home}"
+			                     configInfo="@{configInfo}"
+			                     workingdirectory="${def.workspace}" />
+		</sequential>
+	</macrodef>
+
+
+	<!-- ================================================================== -->
+	<!-- Generates repository meta-data in-place from existing elements 	-->
+	<!-- (uses: repo) 														-->
+	<!-- ================================================================== -->
+	<macrodef name="generate">
+		<attribute name="repo" />
+
+		<sequential>
+			<echo>Generating meta-data for @{repo}</echo>
+			<p2.publish.featuresAndBundles repository="file:@{repo}"
+			                               source="@{repo}"
+			                               compress="true"
+			                               publishArtifacts="false" />
+		</sequential>
+	</macrodef>
+
+
+	<!-- ================================================================== -->
+	<!-- Categorizes the repository meta-data based on category.xml -->
+	<!-- Has to be a Java task - there is no ant task -->
+	<!-- (uses: repo, catetory) -->
+	<!-- ================================================================== -->
+	<macrodef name="categorize">
+		<attribute name="repo" />
+		<attribute name="category" default="${def.category}" />
+
+		<sequential>
+			<echo>Categorizing features and plugins in @{repo} </echo>
+			<java failonerror="true" jar="${ct.eclipse.home}/plugins/${ct.eclipse.launcher}" fork="true">
+				<arg value="-application" />
+				<arg value="org.eclipse.equinox.p2.publisher.CategoryPublisher" />
+				<arg value="-metadataRepository" />
+				<arg value="file:/@{repo}" />
+				<arg value="-categoryDefinition" />
+				<arg value="file:@{category}" />
+				<arg value="-compress" />
+			</java>
+			<sleep seconds="4" />
+		</sequential>
+	</macrodef>
+
+
+	<!-- ================================================================== -->
+	<!-- Invokes ProGuard to post process one plugin, putting the -->
+	<!-- resulting jar(s) in the the dstRepo. -->
+	<!-- Also copies over the feature jar, presumably the latest. -->
+	<!-- (uses: config, feature, srcRepo, dstRepo, plugin1) -->
+	<!-- (uses: plugin2 (optional) -->
+	<!-- ================================================================== -->
+	<macrodef name="proguarddt">
+		<attribute name="config" />
+		<attribute name="plugin1" />
+		<attribute name="plugin2" default="" />
+		<attribute name="plugin3" default="" />
+		<attribute name="srcRepo" default="${def.srcRepo}" />
+		<attribute name="dstRepo" default="${def.dstRepo}" />
+
+		<sequential>
+			<taskdef resource="${ct.proguard.properties}" classpath="${ct.proguard};${ct.java.home}/lib" />
+			<echo>ProGuard config: ${def.workspace}/@{config}</echo>
+			<if>
+				<length string="@{plugin3}" when="greater" length="0" />
+				<then>
+					<maxVersion property="jarName1" dir="@{srcRepo}/plugins" name="@{plugin1}" />
+					<maxVersion property="jarName2" dir="@{srcRepo}/plugins" name="@{plugin2}" />
+					<maxVersion property="jarName3" dir="@{srcRepo}/plugins" name="@{plugin3}" />
+					<echo>Selected plugin 1: ${jarName1}</echo>
+					<echo>Selected plugin 2: ${jarName2}</echo>
+					<echo>Selected plugin 3: ${jarName3}</echo>
+					<proguard configuration="${def.workspace}/@{config}">
+						<injar name="@{srcRepo}/plugins/${jarName1}" />
+						<outjar name="@{dstRepo}/plugins/${jarName1}" />
+						<injar name="@{srcRepo}/plugins/${jarName2}" />
+						<outjar name="@{dstRepo}/plugins/${jarName2}" />
+						<injar name="@{srcRepo}/plugins/${jarName3}" />
+						<outjar name="@{dstRepo}/plugins/${jarName3}" />
+					</proguard>
+				</then>
+				<elseif>
+					<length string="@{plugin2}" when="greater" length="0" />
+					<then>
+						<length string="@{plugin3}" when="greater" length="0" />
+						<maxVersion property="jarName1" dir="@{srcRepo}/plugins" name="@{plugin1}" />
+						<maxVersion property="jarName2" dir="@{srcRepo}/plugins" name="@{plugin2}" />
+						<echo>Selected plugin 1: ${jarName1}</echo>
+						<echo>Selected plugin 2: ${jarName2}</echo>
+						<proguard configuration="${def.workspace}/@{config}">
+							<injar name="@{srcRepo}/plugins/${jarName1}" />
+							<outjar name="@{dstRepo}/plugins/${jarName1}" />
+							<injar name="@{srcRepo}/plugins/${jarName2}" />
+							<outjar name="@{dstRepo}/plugins/${jarName2}" />
+						</proguard>
+					</then>
+				</elseif>
+				<else>
+					<maxVersion property="jarName1" dir="@{srcRepo}/plugins" name="@{plugin1}" />
+					<echo>Selected plugin 1: ${jarName1}</echo>
+					<proguard configuration="${def.workspace}/@{config}">
+						<injar name="@{srcRepo}/plugins/${jarName1}" />
+						<outjar name="@{dstRepo}/plugins/${jarName1}" />
+					</proguard>
+				</else>
+			</if>
+
+			<update repo="@{dstRepo}" />
+
+		</sequential>
+	</macrodef>
+
+
+	<!-- ================================================================== -->
+	<!-- Copies (mirrors) a named feature from one repository into another -->
+	<!-- (uses: feature, srcRepo, dstRepo) -->
+	<!-- ================================================================== -->
+	<macrodef name="publish">
+		<attribute name="feature" />
+		<attribute name="srcRepo" default="${def.srcRepo}" />
+		<attribute name="dstRepo" default="${def.dstRepo}" />
+
+		<sequential>
+			<echo>Publishing @{feature}</echo>
+			<p2.mirror raw="true" ignoreErrors="true" references="false" validate="true" verbose="true">
+				<source location="file:@{srcRepo}" />
+				<destination location="file:@{dstRepo}" format="file:@{srcRepo}" compressed="true" append="true" />
+				<iu id="@{feature}.feature.group" />
+			</p2.mirror>
+		</sequential>
+	</macrodef>
+
+
+	<!-- ================================================================== -->
+	<!-- Append mirror the entire contents of one repository into another. -->
+	<!-- (uses: repoName, srcRepo, dstRepo logDir) -->
+	<!-- ================================================================== -->
+	<macrodef name="publishAll">
+		<attribute name="srcRepo" default="${def.srcRepo}" />
+		<attribute name="dstRepo" default="${def.dstRepo}" />
+
+		<sequential>
+			<p2.mirror raw="true" ignoreErrors="true" references="false">
+				<source location="file:@{srcRepo}" />
+				<destination location="file:@{dstRepo}" format="file:@{srcRepo}" compressed="true" append="true" />
+			</p2.mirror>
+		</sequential>
+	</macrodef>
+
+	<!-- ================================================================== -->
+	<!-- Update a repository based on all present features.					-->
+	<!-- (uses: repo)														-->
+	<!-- ================================================================== -->
+	<macrodef name="update">
+		<attribute name="repo" />
+
+		<sequential>
+			<echo>Updating @{repo}</echo>
+			<p2.process.artifacts repositoryPath="file:@{repo}" normalize="true" />
+		</sequential>
+	</macrodef>
+
+	<!-- ================================================================== -->
+	<!-- Deletes all elements of a repository project. Restores an empty -->
+	<!-- site.xml file. -->
+	<!-- (uses: repo) -->
+	<!-- ================================================================== -->
+	<macrodef name="clean">
+		<attribute name="repo" />
+
+		<sequential>
+			<echo>Clearing @{repo}</echo>
+			<delete verbose="false" quiet="true">
+				<fileset dir="@{repo}/features" includes="*" />
+				<fileset dir="@{repo}/plugins" includes="*" />
+				<fileset dir="@{repo}" includes="*.xml" />
+				<fileset dir="@{repo}" includes="*.jar" />
+			</delete>
+		</sequential>
+	</macrodef>
+
+
+	<!-- ================================================================== -->
+	<!-- Refresh a branch of the workspace; defaults to the workspace root. -->
+	<!-- (uses: wsDir) -->
+	<!-- ================================================================== -->
+	<macrodef name="refresh">
+		<attribute name="wsDir" default="${def.workspace}" />
+
+		<sequential>
+			<echo>Refreshing @{wsDir}</echo>
+			<eclipse.convertPath property="wsPath" fileSystemPath="@{wsDir}" />
+			<eclipse.refreshLocal resource="${wsPath}" depth="infinite" />
+		</sequential>
+	</macrodef>
+
+
+	<!-- ================================================================== -->
+	<!-- Jars the repository xml meta-data (for testing) -->
+	<!-- (uses: repo) -->
+	<!-- ================================================================== -->
+	<macrodef name="fixup">
+		<attribute name="repo" />
+
+		<sequential>
+			<zip destfile="@{repo}/artifacts.jar" encoding="UTF-8" basedir="@{repo}" includes="artifacts.xml" />
+			<delete file="@{repo}/artifacts.xml" verbose="true" quiet="true" />
+			<zip destfile="@{repo}/content.jar" encoding="UTF-8" basedir="@{repo}" includes="content.xml" />
+			<delete file="@{repo}/content.xml" verbose="true" quiet="true" />
+		</sequential>
+	</macrodef>
+
+	<!-- ================================================================== -->
+	<!-- Determine the lastest version of a jar, given a prototype filename -->
+	<!-- and a directory location. Returns the result in a named property. -->
+	<!-- (uses: property, dir, name) -->
+	<!-- ================================================================== -->
+	<macrodef name="maxVersion">
+		<attribute name="property" />
+		<attribute name="dir" />
+		<attribute name="name" />
+
+		<sequential>
+			<path id="filepath">
+				<last count="1">
+					<sort>
+						<name xmlns="antlib:org.apache.tools.ant.types.resources.comparators" />
+						<fileset dir="@{dir}">
+							<include name="@{name}_*.jar" />
+						</fileset>
+					</sort>
+				</last>
+			</path>
+			<basename property="@{property}" file="${toString:filepath}" />
+			<echo>Max version of @{name} is ${toString:filepath}</echo>
+		</sequential>
+	</macrodef>
+
+
+	<!-- ================================================================== -->
+	<!-- Copies the lastest version of a jar, given a prototype filename -->
+	<!-- and source directory, to a destination directory. -->
+	<!-- (uses: fromDir, toDir, name) -->
+	<!-- ================================================================== -->
+	<macrodef name="copyMaxVersion">
+		<attribute name="fromDir" />
+		<attribute name="toDir" />
+		<attribute name="name" />
+
+		<sequential>
+			<maxVersion property="vName" dir="@{fromDir}" name="@{name}" />
+			<echo>Copying @{fromDir}/${vName} to @{toDir} </echo>
+			<copy todir="@{toDir}" file="@{fromDir}/${vName}" overwrite="true" />
+		</sequential>
+	</macrodef>
+
+</project>
