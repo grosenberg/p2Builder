@@ -21,6 +21,7 @@ Disadvantages
 
   1. Uses Ant, which is arcane.
   1. Uses the Eclipse PDE P2 Ant interface, which is byzantine.
+  1. Completely unforgiving for any configuration errors.
   1. Categorization often **appears** to fail (see Notes).
 
 #### License
