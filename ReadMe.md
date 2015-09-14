@@ -10,7 +10,7 @@ P2Builder provides a light-weight script-based mechanism for constructing a priv
 
 Advantages
 
-  1. Are simple, short, clear Ant Xml files.
+  1. Scripts are simple, short, clear Ant Xml files.
   1. Can be run directly from the Eclipse Package Explorer Run menu.
   1. Can be run as needed to build and deploy plugins to a repository.
   1. Can categorize plugins as deployed.
