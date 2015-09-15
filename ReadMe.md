@@ -22,7 +22,6 @@ Disadvantages
   1. Uses Ant, which is arcane.
   1. Uses the Eclipse PDE P2 Ant interface, which is byzantine.
   1. Completely unforgiving for any configuration errors.
-  1. Categorization often **appears** to fail (see Notes).
 
 #### License
 
@@ -39,16 +38,16 @@ Preliminaries:
   1. Make sure the filenames and paths in `Action.properties` and `pde.customTargets.xml` are correct.
   1. Make sure the options selected in `pde.build.properties` are correct.
   1. Make sure the plugin references in `category.xml` are correct.
-  1. Make sure the plugin Dependencies in the plugin being built are up to date -- **minimum version numbers must match the current Eclipse installation**.
+  1. Make sure the plugin Dependencies in the plugin being built are up to date -- minimum version numbers must match the current Eclipse installation.
 
 Run:
 
-  1. Make sure the filenames and paths in a selected p2Build-XXX.xml script are correct. 
+  1. Make sure the filenames and paths in the p2Build-XXX.xml script are correct. 
   1. Run the script using `Package Explorer -> Run As -> Ant Build`
 
 Utilities:
 
-  1. p2Build-XXX.xml -- build scripts -- one per plugin project. 
+  1. p2Build-XXX.xml -- build scripts -- one per plugin project -- copy and edit as desired.
   1. p2Categorize -- runs the categorization process on the private repository.  
   1. p2Clean -- completely clears the private repository.
   1. p2Publish -- updates a public p2 respository from the private repository.
@@ -57,6 +56,6 @@ Utilities:
 Errors:
 
   1. If the final console message is that the build failed, recheck the Preliminaries -- all mistakes are fatal.
-  1. The build process, even when it runs correctly, throws a lot of console error messages. Have to understand the Eclipse PDE P2 Builds processes to know what is significant. FWIW, I don't.
-  1. If the build appears to complete normally, but the plugin, or the most recently built version, does not show for Installation or Update or is not categorized correctly, do a cold shutdown of Eclipse (not `File -> Restart`). If that does not work, count to 10 (decimal), and try again (something in Eclipse is just not refreshing correctly).    
+  1. The build process, even when it runs correctly, throws a lot of console error messages. Have to understand the Eclipse PDE P2 Builds processes to know what is significant and how to fix anything.
+  1. If the build appears to complete normally, but the plugin, or the most recently built version, does not show for Installation or Update or is not categorized correctly, use the Reload button on the Eclipse `Available Software Sites` preference page to force a refresh of the relevant update site information.    
   

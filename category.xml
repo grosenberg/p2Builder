@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/net.certiv.bent.core.win32.feature_0.4.1.qualifier.jar" id="net.certiv.bent.core.win32.feature" version="0.4.1.qualifier" os="win32" ws="win32" arch="x86,x86_64">
+   <feature url="features/net.certiv.bent.core.win32.feature_0.4.6.qualifier.jar" id="net.certiv.bent.core.win32.feature" version="0.4.6.qualifier" os="win32" ws="win32" arch="x86,x86_64">
       <category name="net.certiv"/>
    </feature>
-   <feature url="features/net.certiv.bent.ui.win32.feature_0.4.1.qualifier.jar" id="net.certiv.bent.ui.win32.feature" version="0.4.1.qualifier" os="win32" ws="win32" arch="x86_64">
+   <feature url="features/net.certiv.bent.ui.win32.feature_0.4.6.qualifier.jar" id="net.certiv.bent.ui.win32.feature" version="0.4.6.qualifier" os="win32" ws="win32" arch="x86_64">
       <category name="net.certiv"/>
    </feature>
-   <feature url="features/net.certiv.bent.ui.win32.x86.feature_0.4.1.qualifier.jar" id="net.certiv.bent.ui.win32.x86.feature" version="0.4.1.qualifier" os="win32" ws="win32" arch="x86">
+   <feature url="features/net.certiv.bent.ui.win32.x86.feature_0.4.6.qualifier.jar" id="net.certiv.bent.ui.win32.x86.feature" version="0.4.6.qualifier" os="win32" ws="win32" arch="x86">
       <category name="net.certiv"/>
    </feature>
    <feature url="features/net.certiv.codechase.feature_0.9.0.qualifier.jar" id="net.certiv.codechase.feature" version="0.9.0.qualifier">

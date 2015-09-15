@@ -10,23 +10,36 @@
 	<property name="dstRepo" value="${def.dstRepo}" />
 	<property name="configName" value="${ui}/BentUI.pro" />
 
+	<property name="dir32" value="../net.certiv.bent.ui.win32.x86" />
 	<property name="dir64" value="../net.certiv.bent.ui.win32" />
 
 	<property name="ui" value="net.certiv.bent.ui.win32" />
-	<property name="core" value="net.certiv.bent.core.win32" />
+	<property name="x86" value="net.certiv.bent.ui.win32.x86" />
+
 
 	<target name="p2Build">
 
 		<!-- Set up the build directory -->
 		<cleanBuildDir />
 
+		<!-- Generate the src for the 32bit version -->
+		<gen32bitProject dir64="${dir64}" dir32="${dir32}" />
+
 		<!-- Prep the build directory -->
-		<preBuild features="net.certiv.bent.core.win32.feature, net.certiv.bent.ui.win32.feature"
-		          plugins="net.certiv.bent.core.win32, net.certiv.bent.ui.win32" />
+		<preBuild features="net.certiv.bent.ui.win32.x86.feature"
+		          plugins="net.certiv.bent.ui.win32.x86" />
 
-		<!-- Run the PDE build for x86_64 features -->
-		<build features="net.certiv.bent.ui.win32.feature" b.arch="x86_64" configs="win32,win32,x86_64" />
+		<!-- Run the PDE build for x86 features -->
+		<build features="net.certiv.bent.ui.win32.x86.feature"
+		       b.arch="x86"
+		       configs="win32,win32,x86"
+		       e.home="${ct.eclipse_x86.home}"
+		       j.home="${ct.java_x86.home}" />
 
+		<!-- Clean out the src for the 32bit version -->
+		<delete>
+			<fileset dir="${dir32}/src" includes="**/*.java **/*.class" />
+		</delete>
 
 		<!-- Perform post processing to optimize the jars -->
 		<refresh wsDir="${srcRepo}" />
@@ -35,11 +48,10 @@
 		<categorize repo="${srcRepo}" />
 		<refresh wsDir="${srcRepo}" />
 
-		<publish feature="${ui}.feature" />
-		<publish feature="${core}.feature" />
+		<publish feature="${x86}.feature" />
 
-		<echo>Optimizing ${ui}</echo>
-		<proguarddt config="${configName}" plugin1="${ui}" plugin2="${core}" />
+		<echo>Optimizing ${x86}</echo>
+		<proguarddt config="${configName}" plugin1="${x86}" />
 
 		<echo>Processing repository at "${dstRepo}"</echo>
 		<refresh wsDir="${dstRepo}" />
@@ -47,6 +59,6 @@
 		<refresh wsDir="${dstRepo}" />
 		<categorize repo="${dstRepo}" />
 		<refresh wsDir="${dstRepo}" />
-		
+
 	</target>
 </project>
